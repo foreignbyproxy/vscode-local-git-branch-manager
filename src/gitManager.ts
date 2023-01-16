@@ -12,11 +12,13 @@ export class GitManager extends Disposable {
 	}
 
 	public canUseGit() {
-		this.runGitCommand(`git --version`).catch((_) => {
-			return false;
-		});
-
-		return true;
+		return this.runGitCommand(`git --version`)
+			.then(() => {
+				return false;
+			})
+			.catch((_) => {
+				return false;
+			});
 	}
 
 	public getBranches() {
