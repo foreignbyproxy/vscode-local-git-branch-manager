@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
 
-import { Config } from "./config";
-import { GitManager } from "./gitManager";
 import { Logger } from "./logger";
-import { CommandManager } from "./commands";
+// import { Config } from "./config";
+import { GitManager } from "./gitManager";
+import { GitBranchManagerView } from "./gitBranchManagerView";
 
 export async function activate(context: vscode.ExtensionContext) {
 	const logger = new Logger();
@@ -15,13 +15,16 @@ export async function activate(context: vscode.ExtensionContext) {
 	const gitCheck = await gitManager.canUseGit();
 	if (!gitCheck) {
 		vscode.window.showErrorMessage(
-			"Could access Git. Please make sure Git is accessible to VScode and try again."
+			"Could not access Git. Please make sure Git is accessible to VScode and try again."
 		);
 	}
 
-	const commandManager = new CommandManager(context, gitManager, logger);
+	vscode.commands.registerCommand("git-branch-manager.view", (...args) => {
+		logger.log("Command: git-branch-manager.view");
+		GitBranchManagerView.createOrShow(context, gitManager, logger);
+	});
 
-	context.subscriptions.push(gitManager, commandManager, logger);
+	context.subscriptions.push(gitManager, logger);
 
 	logger.log("Started Git Branch Manager");
 }
