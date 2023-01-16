@@ -5,12 +5,16 @@ import { GitManager } from "./gitManager";
 
 import { Disposable } from "./disposable";
 
+import { transformGetBranchesOutput } from "./utils";
+
 export class GitBranchManagerView extends Disposable {
 	public static currentView: GitBranchManagerView | undefined;
 
-	private readonly gitManager: GitManager;
-	private readonly panel: vscode.WebviewPanel;
 	private readonly logger: Logger;
+	private readonly gitManager: GitManager;
+	private readonly context: vscode.ExtensionContext;
+
+	private readonly panel: vscode.WebviewPanel;
 
 	public static createOrShow(
 		context: vscode.ExtensionContext,
@@ -34,8 +38,8 @@ export class GitBranchManagerView extends Disposable {
 		super();
 
 		this.logger = logger;
-
 		this.gitManager = gitManager;
+		this.context = context;
 
 		this.panel = vscode.window.createWebviewPanel(
 			"git-branch-manager",
@@ -56,7 +60,8 @@ export class GitBranchManagerView extends Disposable {
 	private update() {
 		return this.gitManager
 			.getBranches()
-			.then((branches) => {
+			.then((results) => {
+				const branches = transformGetBranchesOutput(results);
 				this.panel.webview.html = this.getHtmlForWebview(branches);
 			})
 			.catch((err: Error) => {
@@ -80,6 +85,66 @@ export class GitBranchManagerView extends Disposable {
 	 * @returns The HTML.
 	 */
 	private getHtmlForWebview(branches: string[]) {
-		return branches.join(",");
+		return /*html*/ `<!DOCTYPE html>
+		<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<title>Git Branch Manager</title>
+				<style></style>
+			</head>
+			<body>
+				<div id="view">
+					<form id="git-branch-manager-form" action="">
+						<div id="header">
+							<button type="submit">Delete</button>
+							<button type="reset">Clear</button>
+						</div>
+						<table>
+							<thead>
+								<tr>
+									<td></td>
+									<td>Branch Name</td>
+								</tr>
+							</thead>
+							<tbody>
+								${this.getBranchTableRows(branches)}
+							</tbody>
+						</table>
+					</form>
+				</div>
+			</body>
+			<script>
+				const form = document.getElementById("git-branch-manager-form");
+				form.addEventListener("submit", function (event) {
+					event.preventDefault();
+					const form = event.currentTarget;
+					const formData = new FormData(form);
+					const selectedBranches = formData.getAll('branch');
+					console.log(selectedBranches);
+				});
+			</script>
+		</html>`;
+	}
+
+	private getBranchTableRows(branches: string[]) {
+		let output = "";
+
+		branches.forEach((branch, index) => {
+			const id = `branch-${index}`;
+
+			output += /* html */ `
+				<tr>
+					<td>
+						<label for="${id}">
+							<input id="${id}" name="branch" type="checkbox" value="${branch}">
+						</label>
+					</td>
+					<td>${branch}</td>
+				</tr>
+			`;
+		});
+
+		return output;
 	}
 }

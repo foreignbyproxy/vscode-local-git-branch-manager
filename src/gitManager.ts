@@ -27,7 +27,7 @@ export class GitManager extends Disposable {
 	public getBranches() {
 		this.logger.log("Getting branches");
 		return this.runGitCommand(`git branch`).then((results) => {
-			return [results];
+			return results;
 		});
 	}
 
