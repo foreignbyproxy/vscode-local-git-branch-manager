@@ -10,6 +10,7 @@ export class GitBranchManagerView extends Disposable {
 
 	private readonly gitManager: GitManager;
 	private readonly panel: vscode.WebviewPanel;
+	private readonly logger: Logger;
 
 	public static createOrShow(
 		context: vscode.ExtensionContext,
@@ -21,12 +22,18 @@ export class GitBranchManagerView extends Disposable {
 			GitBranchManagerView.currentView.reveal();
 		} else {
 			logger.log("Creating new view");
-			GitBranchManagerView.currentView = new GitBranchManagerView(context, gitManager);
+			GitBranchManagerView.currentView = new GitBranchManagerView(
+				context,
+				gitManager,
+				logger
+			);
 		}
 	}
 
-	private constructor(context: vscode.ExtensionContext, gitManager: GitManager) {
+	private constructor(context: vscode.ExtensionContext, gitManager: GitManager, logger: Logger) {
 		super();
+
+		this.logger = logger;
 
 		this.gitManager = gitManager;
 
@@ -47,8 +54,18 @@ export class GitBranchManagerView extends Disposable {
 	 * Update the HTML document loaded in the Webview.
 	 */
 	private update() {
-		const branches = this.gitManager.getBranches();
-		this.panel.webview.html = this.getHtmlForWebview(branches);
+		return this.gitManager
+			.getBranches()
+			.then((branches) => {
+				this.panel.webview.html = this.getHtmlForWebview(branches);
+			})
+			.catch((err: Error) => {
+				this.logger.error(err.message);
+				vscode.window.showErrorMessage(
+					"Could not get branches. Make sure Git is accessible and the workspace contains a Git respository."
+				);
+				return;
+			});
 	}
 
 	/**
