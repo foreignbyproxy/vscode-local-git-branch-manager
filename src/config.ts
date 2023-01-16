@@ -17,6 +17,7 @@ export class Config {
 		const configValue = vscode.workspace
 			.getConfiguration("git")
 			.get<string | string[] | null>("path", null);
+
 		if (configValue === null) {
 			return [];
 		} else if (typeof configValue === "string") {

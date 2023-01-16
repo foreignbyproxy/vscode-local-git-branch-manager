@@ -4,8 +4,3 @@ export const enum DeleteStrategy {
 	doubleCheckOnce = "double-check-once",
 	deleteIfHasRemote = "delete-if-has-remote",
 }
-
-export interface GitExecutable {
-	readonly path: string;
-	readonly version: string;
-}

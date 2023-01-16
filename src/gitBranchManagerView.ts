@@ -1,33 +1,33 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { Logger } from "./logger";
-import { DataSource } from "./dataSource";
+import { GitManager } from "./gitManager";
 
 import { Disposable } from "./disposable";
 
 export class GitBranchManagerView extends Disposable {
 	public static currentPanel: GitBranchManagerView | undefined;
 
-	private readonly dataSource: DataSource;
+	private readonly gitManager: GitManager;
 	private readonly panel: vscode.WebviewPanel;
 
 	public static createOrShow(
 		context: vscode.ExtensionContext,
-		dataSource: DataSource,
+		gitManager: GitManager,
 		logger: Logger
 	) {
 		if (GitBranchManagerView.currentPanel) {
 			logger.log("Show current view");
 		} else {
 			logger.log("Creating new view");
-			GitBranchManagerView.currentPanel = new GitBranchManagerView(context, dataSource);
+			GitBranchManagerView.currentPanel = new GitBranchManagerView(context, gitManager);
 		}
 	}
 
-	private constructor(context: vscode.ExtensionContext, dataSource: DataSource) {
+	private constructor(context: vscode.ExtensionContext, gitManager: GitManager) {
 		super();
 
-		this.dataSource = dataSource;
+		this.gitManager = gitManager;
 
 		this.panel = vscode.window.createWebviewPanel(
 			"git-branch-manager",
@@ -46,7 +46,7 @@ export class GitBranchManagerView extends Disposable {
 	 * Update the HTML document loaded in the Webview.
 	 */
 	private update() {
-		const branches = this.dataSource.getBranches();
+		const branches = this.gitManager.getBranches();
 		this.panel.webview.html = this.getHtmlForWebview(branches);
 	}
 
