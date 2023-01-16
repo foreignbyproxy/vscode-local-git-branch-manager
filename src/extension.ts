@@ -19,7 +19,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		);
 	}
 
-	vscode.commands.registerCommand("git-branch-manager.view", (...args) => {
+	vscode.commands.registerCommand("git-branch-manager.view", () => {
 		logger.log("Command: git-branch-manager.view");
 		GitBranchManagerView.createOrShow(context, gitManager, logger);
 	});

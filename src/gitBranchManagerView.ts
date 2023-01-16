@@ -6,7 +6,7 @@ import { GitManager } from "./gitManager";
 import { Disposable } from "./disposable";
 
 export class GitBranchManagerView extends Disposable {
-	public static currentPanel: GitBranchManagerView | undefined;
+	public static currentView: GitBranchManagerView | undefined;
 
 	private readonly gitManager: GitManager;
 	private readonly panel: vscode.WebviewPanel;
@@ -16,11 +16,12 @@ export class GitBranchManagerView extends Disposable {
 		gitManager: GitManager,
 		logger: Logger
 	) {
-		if (GitBranchManagerView.currentPanel) {
+		if (GitBranchManagerView.currentView) {
 			logger.log("Show current view");
+			GitBranchManagerView.currentView.reveal();
 		} else {
 			logger.log("Creating new view");
-			GitBranchManagerView.currentPanel = new GitBranchManagerView(context, gitManager);
+			GitBranchManagerView.currentView = new GitBranchManagerView(context, gitManager);
 		}
 	}
 
@@ -48,6 +49,13 @@ export class GitBranchManagerView extends Disposable {
 	private update() {
 		const branches = this.gitManager.getBranches();
 		this.panel.webview.html = this.getHtmlForWebview(branches);
+	}
+
+	/**
+	 * Update the HTML document loaded in the Webview.
+	 */
+	private reveal() {
+		this.panel.reveal();
 	}
 
 	/**
