@@ -85,13 +85,17 @@ export class GitBranchManagerView extends Disposable {
 	 * @returns The HTML.
 	 */
 	private getHtmlForWebview(branches: string[]) {
+		const myStyle = this.panel.webview.asWebviewUri(
+			vscode.Uri.joinPath(this.context.extensionUri, "media", "gitBranchManager.css")
+		);
+
 		return /*html*/ `<!DOCTYPE html>
 		<html lang="en">
 			<head>
 				<meta charset="UTF-8">
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<title>Git Branch Manager</title>
-				<style></style>
+				<link href="${myStyle}" rel="stylesheet" />
 			</head>
 			<body>
 				<div id="view">
@@ -100,11 +104,14 @@ export class GitBranchManagerView extends Disposable {
 							<button type="submit">Delete</button>
 							<button type="reset">Clear</button>
 						</div>
-						<table>
+						<table id="branch-table">
 							<thead>
 								<tr>
 									<td></td>
 									<td>Branch Name</td>
+									<td>Last Commit</td>
+									<td>Last Commit (Date)</td>
+									<td>Has Remote?</td>
 								</tr>
 							</thead>
 							<tbody>
@@ -141,6 +148,9 @@ export class GitBranchManagerView extends Disposable {
 						</label>
 					</td>
 					<td>${branch}</td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 			`;
 		});
